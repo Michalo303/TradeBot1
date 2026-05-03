@@ -61,7 +61,7 @@ In `user_data/config/config.private.json` — add exchange section:
 - [ ] Binance API key created with spot-only + no-withdrawals
 - [ ] API keys stored in config.private.json (NOT in git)
 - [ ] Telegram notifications confirmed working
-- [ ] Web UI accessible at http://localhost:8080
+- [ ] Web UI přístupné přes SSH tunnel (`ssh -L 8080:localhost:8080 root@91.99.99.158`) → http://localhost:8080
 - [ ] Emergency stop documented: `docker compose stop freqtrade`
 - [ ] Calendar reminder set for 7-day live review
 
