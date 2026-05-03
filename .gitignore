@@ -1,5 +1,6 @@
 # Secrets
 .env
+AGENTS.md
 user_data/config/config.private.json
 
 # Market data and logs (large, reproducible)
