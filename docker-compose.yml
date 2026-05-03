@@ -23,4 +23,5 @@ services:
       --logfile /freqtrade/user_data/logs/freqtrade.log
       --config /freqtrade/user_data/config/config.json
       --config /freqtrade/user_data/config/config.private.json
+      --config /freqtrade/user_data/config/blacklist-binance.json
       --strategy NostalgiaForInfinityX7

@@ -8,6 +8,13 @@ user_data/data/
 user_data/logs/
 user_data/backtest_results/
 
+# Runtime artefakty
+user_data/*.sqlite
+user_data/*.sqlite-shm
+user_data/*.sqlite-wal
+user_data/*.json.gz
+user_data/nfix7-*.json
+
 # OS
 .DS_Store
 Thumbs.db
