@@ -1,0 +1,16 @@
+services:
+  freqtrade:
+    image: freqtradeorg/freqtrade:2024.5
+    restart: unless-stopped
+    container_name: freqtrade-nfi-dryrun
+    volumes:
+      - ./user_data:/freqtrade/user_data
+    ports:
+      - "8080:8080"
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade.log
+      --config /freqtrade/user_data/config/config.json
+      --config /freqtrade/user_data/config/config.private.json
+      --strategy NostalgiaForInfinityX7
+      --strategy-path /freqtrade/user_data/strategies
