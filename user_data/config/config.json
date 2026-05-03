@@ -12,7 +12,6 @@
   "timeframe": "5m",
   "grinding_enable": true,
   "strategy": "NostalgiaForInfinityX7",
-  "strategy_path": "/freqtrade/user_data/strategies",
   "internals": {
     "process_throttle_secs": 5
   },
@@ -115,8 +114,7 @@
     "listen_port": 8080,
     "verbosity": "error",
     "enable_openapi": true,
-    "jwt_secret_key": "ef922c77d0faacad2489cdddec98ee31ba6267ac6532ed85ed83d31fbeeb69",
-    "CORS_origins": ["http://localhost:8080"]
+    "CORS_origins": []
   },
   "bot_name": "nfi-dryrun",
   "initial_state": "running",
