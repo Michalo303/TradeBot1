@@ -103,11 +103,6 @@
     "entry": "GTC",
     "exit": "GTC"
   },
-  "stoploss": -0.10,
-  "trailing_stop": false,
-  "minimal_roi": {
-    "0": 0.1
-  },
   "unfilledtimeout": {
     "entry": 3,
     "exit": 2,

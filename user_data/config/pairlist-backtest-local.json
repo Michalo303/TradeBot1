@@ -1,0 +1,17 @@
+{
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ],
+  "exchange": {
+    "pair_whitelist": [
+      "BTC/USDT", "ETH/USDT", "SOL/USDT", "XRP/USDT", "ADA/USDT",
+      "DOGE/USDT", "AVAX/USDT", "LINK/USDT", "DOT/USDT", "MATIC/USDT",
+      "LTC/USDT", "UNI/USDT", "ATOM/USDT", "ETC/USDT", "XLM/USDT",
+      "ALGO/USDT", "VET/USDT", "FIL/USDT", "HBAR/USDT", "MANA/USDT",
+      "AXS/USDT", "THETA/USDT", "ONE/USDT", "NEAR/USDT", "TRX/USDT",
+      "APT/USDT", "OP/USDT", "ARB/USDT"
+    ]
+  }
+}

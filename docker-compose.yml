@@ -13,4 +13,3 @@ services:
       --config /freqtrade/user_data/config/config.json
       --config /freqtrade/user_data/config/config.private.json
       --strategy NostalgiaForInfinityX7
-      --strategy-path /freqtrade/user_data/strategies
