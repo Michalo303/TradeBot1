@@ -18,3 +18,7 @@ user_data/nfix7-*.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]

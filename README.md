@@ -46,6 +46,12 @@ Stop the bot:
 docker compose stop
 ```
 
+Run repository safety checks:
+
+```bash
+python scripts/check_repo_safety.py
+```
+
 ## Live Trading
 
 Live trading is intentionally disabled by default:
