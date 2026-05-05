@@ -24,4 +24,5 @@ services:
       --config /freqtrade/user_data/config/config.json
       --config /freqtrade/user_data/config/config.private.json
       --config /freqtrade/user_data/config/blacklist-binance.json
+      --config /freqtrade/user_data/config/pairlist-relaxed-filters.json
       --strategy NostalgiaForInfinityX7
