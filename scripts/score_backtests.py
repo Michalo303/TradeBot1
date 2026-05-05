@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import argparse
+import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 
@@ -137,3 +141,74 @@ def parse_backtest_payload(payload: dict[str, Any], source: str) -> BacktestMetr
         losing_days=_int(data.get("losing_days")),
         backtest_days=_int(data.get("backtest_days")),
     )
+
+
+def render_markdown_report(scores: list[BacktestScore]) -> str:
+    lines = [
+        "# TradeBot1 Risk Score Report",
+        "",
+        "This report is not a live trading recommendation.",
+        "",
+        "| Source | Trades | Profit Factor | Drawdown % | Win Rate % | Score | Confidence | Recommendation |",
+        "|---|---:|---:|---:|---:|---:|---|---|",
+    ]
+    for item in scores:
+        m = item.metrics
+        lines.append(
+            f"| {m.source} | {m.trades} | {m.profit_factor:.2f} | "
+            f"{m.max_drawdown_pct:.2f} | {m.winrate * 100:.1f} | "
+            f"{item.score} | {item.confidence} | {item.recommendation} |"
+        )
+    lines.extend(["", "## Notes", ""])
+    for item in scores:
+        if item.reasons:
+            lines.append(f"- `{item.metrics.source}`: " + "; ".join(item.reasons))
+    if all(not item.reasons for item in scores):
+        lines.append("- No additional scoring penalties were recorded.")
+    return "\n".join(lines) + "\n"
+
+
+def score_to_dict(item: BacktestScore) -> dict[str, object]:
+    m = item.metrics
+    return {
+        "source": m.source,
+        "strategy": m.strategy,
+        "trades": m.trades,
+        "profit_factor": m.profit_factor,
+        "profit_total_pct": m.profit_total_pct,
+        "max_drawdown_pct": m.max_drawdown_pct,
+        "winrate": m.winrate,
+        "score": item.score,
+        "confidence": item.confidence,
+        "recommendation": item.recommendation,
+        "reasons": list(item.reasons),
+    }
+
+
+def load_and_score(path: Path) -> BacktestScore:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return score_backtest(parse_backtest_payload(payload, source=path.name))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Score Freqtrade backtest JSON files.")
+    parser.add_argument("backtests", nargs="+", type=Path)
+    parser.add_argument("--output-dir", type=Path, default=Path("reports"))
+    args = parser.parse_args()
+
+    scores = [load_and_score(path) for path in args.backtests]
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    json_path = args.output_dir / f"risk-score-{stamp}.json"
+    md_path = args.output_dir / f"risk-score-{stamp}.md"
+    json_path.write_text(
+        json.dumps([score_to_dict(item) for item in scores], indent=2) + "\n",
+        encoding="utf-8",
+    )
+    md_path.write_text(render_markdown_report(scores), encoding="utf-8")
+    print(f"Wrote {json_path}")
+    print(f"Wrote {md_path}")
+
+
+if __name__ == "__main__":
+    main()

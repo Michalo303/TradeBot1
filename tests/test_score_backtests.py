@@ -4,6 +4,7 @@ from scripts.score_backtests import (
     BacktestMetrics,
     confidence_label,
     parse_backtest_payload,
+    render_markdown_report,
     score_backtest,
 )
 
@@ -76,6 +77,21 @@ class ScoreBacktestsTests(unittest.TestCase):
         result = score_backtest(metrics)
 
         self.assertEqual(result.recommendation, "COLLECT_MORE_DATA")
+
+
+    def test_markdown_report_states_not_live_recommendation(self):
+        metrics = BacktestMetrics(
+            source="sample.json", strategy="NFI", trades=2, profit_factor=1.8,
+            profit_total_pct=0.67, max_drawdown_pct=0.0, winrate=1.0,
+            avg_duration_seconds=7680, winning_days=2, draw_days=0,
+            losing_days=0, backtest_days=60,
+        )
+
+        markdown = render_markdown_report([score_backtest(metrics)])
+
+        self.assertIn("not a live trading recommendation", markdown)
+        self.assertIn("COLLECT_MORE_DATA", markdown)
+        self.assertIn("LOW", markdown)
 
 
 if __name__ == "__main__":
