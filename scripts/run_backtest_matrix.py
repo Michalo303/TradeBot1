@@ -4,8 +4,10 @@ import argparse
 import json
 import sys
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
+
+from scripts.score_backtests import BacktestScore, load_and_score
 
 
 FREQTRADE_IMAGE = "freqtradeorg/freqtrade:2024.5"
@@ -41,6 +43,40 @@ def build_docker_cmd(
         "--export-filename", container_output,
     ]
     return cmd, output_path
+
+
+@dataclass(frozen=True)
+class CellResult:
+    variant: str
+    timerange: str
+    score: BacktestScore
+
+
+def score_cell(output_path: Path) -> BacktestScore:
+    try:
+        return load_and_score(output_path)
+    except (json.JSONDecodeError, KeyError, ValueError, TypeError) as exc:
+        print(f"ERROR: failed to parse {output_path}: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
+
+
+def render_matrix_summary(cells: list[CellResult]) -> str:
+    lines = [
+        "# TradeBot1 Backtest Matrix Summary",
+        "",
+        "This report is not a live trading recommendation.",
+        "portfolio behavior not replicated: results are per-variant directional comparison only.",
+        "",
+        "| Variant | Timerange | Trades | Score | Confidence | Recommendation |",
+        "|---|---|---:|---:|---|---|",
+    ]
+    for cell in cells:
+        s = cell.score
+        m = s.metrics
+        lines.append(
+            f"| {cell.variant} | {cell.timerange} | {m.trades} | {s.score} | {s.confidence} | {s.recommendation} |"
+        )
+    return "\n".join(lines) + "\n"
 
 
 def validate_manifest(data: dict) -> dict:

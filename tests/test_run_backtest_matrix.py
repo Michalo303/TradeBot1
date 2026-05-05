@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.run_backtest_matrix import validate_manifest, build_docker_cmd
+from scripts.run_backtest_matrix import validate_manifest, build_docker_cmd, score_cell, CellResult, render_matrix_summary
 
 
 class ValidateManifestTests(unittest.TestCase):
@@ -74,6 +74,88 @@ class CLITests(unittest.TestCase):
             manifest_path = f.name
         code = self._run_main([manifest_path, "--timerange", "20260101-20260201", "--max-pairs", "2"])
         self.assertNotEqual(code, 0)
+
+
+class ScoreCellTests(unittest.TestCase):
+    def _make_payload(self, trades=2):
+        return {
+            "strategy": {
+                "NostalgiaForInfinityX7": {
+                    "total_trades": trades, "profit_factor": 1.8, "profit_total_pct": 0.67,
+                    "max_drawdown_account": 0.0, "winrate": 1.0, "holding_avg_s": 7680,
+                    "winning_days": 2, "draw_days": 0, "losing_days": 0, "backtest_days": 60,
+                }
+            },
+            "strategy_comparison": [{"key": "NostalgiaForInfinityX7"}],
+        }
+
+    def test_score_cell_calls_load_and_score(self):
+        import json, tempfile
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(self._make_payload(), f)
+            path = Path(f.name)
+        result = score_cell(path)
+        from scripts.score_backtests import BacktestScore
+        self.assertIsInstance(result, BacktestScore)
+
+    def test_score_cell_raises_on_invalid_json(self):
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write("not valid json")
+            path = Path(f.name)
+        with self.assertRaises(SystemExit):
+            score_cell(path)
+
+    def test_score_cell_raises_on_missing_strategy_key(self):
+        import json, tempfile
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump({"wrong": "format"}, f)
+            path = Path(f.name)
+        with self.assertRaises(SystemExit):
+            score_cell(path)
+
+
+class RenderMatrixSummaryTests(unittest.TestCase):
+    def _make_cell(self, variant, timerange, trades=2):
+        import json, tempfile
+        payload = {
+            "strategy": {
+                "NostalgiaForInfinityX7": {
+                    "total_trades": trades, "profit_factor": 1.5, "profit_total_pct": 1.0,
+                    "max_drawdown_account": 0.0, "winrate": 1.0, "holding_avg_s": 3600,
+                    "winning_days": 2, "draw_days": 0, "losing_days": 0, "backtest_days": 60,
+                }
+            },
+            "strategy_comparison": [{"key": "NostalgiaForInfinityX7"}],
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(payload, f)
+            path = Path(f.name)
+        score = score_cell(path)
+        return CellResult(variant=variant, timerange=timerange, score=score)
+
+    def test_summary_contains_variant_and_timerange(self):
+        cells = [self._make_cell("conservative", "20260101-20260201")]
+        md = render_matrix_summary(cells)
+        self.assertIn("conservative", md)
+        self.assertIn("20260101-20260201", md)
+
+    def test_summary_not_live_trading_recommendation(self):
+        cells = [self._make_cell("conservative", "20260101-20260201")]
+        md = render_matrix_summary(cells)
+        self.assertIn("not a live trading recommendation", md)
+
+    def test_summary_portfolio_disclaimer(self):
+        cells = [self._make_cell("conservative", "20260101-20260201")]
+        md = render_matrix_summary(cells)
+        self.assertIn("portfolio behavior not replicated", md)
+
+    def test_summary_contains_score_confidence_recommendation(self):
+        cells = [self._make_cell("conservative", "20260101-20260201")]
+        md = render_matrix_summary(cells)
+        self.assertIn("Score", md)
+        self.assertIn("Confidence", md)
+        self.assertIn("Recommendation", md)
 
 
 class BuildDockerCmdTests(unittest.TestCase):
