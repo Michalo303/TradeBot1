@@ -25,3 +25,6 @@ __pycache__/
 
 # Agent design/coordination docs (temp files)
 docs/codex-*.txt
+
+# Daily dry-run status snapshots (runtime data, not committed)
+logs/
