@@ -1,0 +1,24 @@
+{
+  "variant": "relaxed-18-runtime",
+  "description": "Mirrors current live dry-run pairlist (18-pair cap, relaxed filters). Use for baseline comparison.",
+  "pairs": [
+    "BTC/USDT",
+    "ETH/USDT",
+    "SOL/USDT",
+    "XRP/USDT",
+    "DOGE/USDT",
+    "LINK/USDT",
+    "AVAX/USDT",
+    "NEAR/USDT",
+    "TON/USDT",
+    "PEPE/USDT",
+    "TAO/USDT",
+    "ENA/USDT",
+    "PENDLE/USDT",
+    "ZEC/USDT",
+    "DASH/USDT",
+    "ONDO/USDT",
+    "LUNC/USDT",
+    "SUI/USDT"
+  ]
+}

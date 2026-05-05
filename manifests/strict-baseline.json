@@ -1,0 +1,15 @@
+{
+  "variant": "strict-baseline",
+  "description": "Conservative liquid pairs only, reflects original strict filter behavior",
+  "pairs": [
+    "BTC/USDT",
+    "ETH/USDT",
+    "SOL/USDT",
+    "XRP/USDT",
+    "DOGE/USDT",
+    "LINK/USDT",
+    "AVAX/USDT",
+    "NEAR/USDT",
+    "UNI/USDT"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "variant": "major3-btc-eth-sol",
+  "description": "BTC+ETH+SOL only. Minimal pair set for long-range backtesting without OOM risk.",
+  "pairs": [
+    "BTC/USDT",
+    "ETH/USDT",
+    "SOL/USDT"
+  ]
+}

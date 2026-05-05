@@ -1,0 +1,21 @@
+{
+  "variant": "relaxed-15-safe",
+  "description": "15-pair fallback if analysis time exceeds threshold at 18 pairs. Drops meme/low-cap pairs.",
+  "pairs": [
+    "BTC/USDT",
+    "ETH/USDT",
+    "SOL/USDT",
+    "XRP/USDT",
+    "DOGE/USDT",
+    "LINK/USDT",
+    "AVAX/USDT",
+    "NEAR/USDT",
+    "TON/USDT",
+    "TAO/USDT",
+    "ENA/USDT",
+    "PENDLE/USDT",
+    "ZEC/USDT",
+    "ONDO/USDT",
+    "SUI/USDT"
+  ]
+}

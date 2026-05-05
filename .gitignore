@@ -22,3 +22,6 @@ Thumbs.db
 # Python
 __pycache__/
 *.py[cod]
+
+# Agent design/coordination docs (temp files)
+docs/codex-*.txt
