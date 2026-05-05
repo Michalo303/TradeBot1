@@ -1,0 +1,13 @@
+{
+  "variant": "signal-candidates",
+  "description": "Pairs that generated signals in 2026-04 diagnostic backtest but may be filtered by dynamic whitelist. Use for cross-pairlist comparison only.",
+  "pairs": [
+    "THETA/USDT",
+    "DOGE/USDT",
+    "BTC/USDT",
+    "ETH/USDT",
+    "SOL/USDT",
+    "XRP/USDT",
+    "LINK/USDT"
+  ]
+}
