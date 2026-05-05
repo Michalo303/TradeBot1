@@ -46,10 +46,17 @@ Stop the bot:
 docker compose stop
 ```
 
-Run repository safety checks:
+Run repository checks:
 
 ```bash
 python scripts/check_repo_safety.py
+python -m unittest discover -s tests -v
+```
+
+Generate a risk-score report from a Freqtrade backtest JSON:
+
+```bash
+python scripts/score_backtests.py user_data/backtest_results/backtest-result-YYYY-MM-DD_HH-MM-SS.json --output-dir reports
 ```
 
 ## Live Trading

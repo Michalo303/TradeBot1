@@ -116,6 +116,26 @@ def check_json_templates() -> None:
         json.loads(read(path))
 
 
+VALID_RECOMMENDATIONS = {
+    "KEEP_CURRENT",
+    "EXPAND_PAIRLIST",
+    "TIGHTEN_PAIRLIST",
+    "COLLECT_MORE_DATA",
+    "DO_NOT_CHANGE_YET",
+}
+
+
+def check_report_json_files(tracked: list[str]) -> None:
+    for path in tracked:
+        if path.startswith("reports/risk-score-") and path.endswith(".json"):
+            data = json.loads(read(path))
+            if not isinstance(data, list):
+                fail(f"report JSON must contain a list: {path}")
+            for item in data:
+                if item.get("recommendation") not in VALID_RECOMMENDATIONS:
+                    fail(f"invalid report recommendation in {path}")
+
+
 def main() -> None:
     tracked = git_ls_files()
     check_no_forbidden_tracked_files(tracked)
@@ -123,6 +143,7 @@ def main() -> None:
     check_docker_web_ui_binding()
     check_freqtrade_config()
     check_json_templates()
+    check_report_json_files(tracked)
     print("PASS: repository safety checks passed")
 
 
