@@ -1,6 +1,11 @@
 import unittest
 
-from scripts.score_backtests import confidence_label, parse_backtest_payload
+from scripts.score_backtests import (
+    BacktestMetrics,
+    confidence_label,
+    parse_backtest_payload,
+    score_backtest,
+)
 
 
 class ScoreBacktestsTests(unittest.TestCase):
@@ -40,6 +45,37 @@ class ScoreBacktestsTests(unittest.TestCase):
         self.assertEqual(metrics.profit_factor, 1.8)
         self.assertEqual(metrics.max_drawdown_pct, 0.0)
         self.assertEqual(metrics.winrate, 1.0)
+
+
+    def test_score_penalizes_low_trade_count_and_drawdown(self):
+        low_sample = BacktestMetrics(
+            source="low.json", strategy="NFI", trades=2, profit_factor=3.0,
+            profit_total_pct=10.0, max_drawdown_pct=0.0, winrate=1.0,
+            avg_duration_seconds=3600, winning_days=2, draw_days=0,
+            losing_days=0, backtest_days=60,
+        )
+        risky = BacktestMetrics(
+            source="risky.json", strategy="NFI", trades=120, profit_factor=1.3,
+            profit_total_pct=12.0, max_drawdown_pct=22.0, winrate=0.58,
+            avg_duration_seconds=7200, winning_days=20, draw_days=4,
+            losing_days=10, backtest_days=60,
+        )
+
+        self.assertEqual(score_backtest(low_sample).confidence, "LOW")
+        self.assertLess(score_backtest(low_sample).score, 60)
+        self.assertLess(score_backtest(risky).score, 70)
+
+    def test_recommendation_prefers_collect_more_data_for_low_confidence(self):
+        metrics = BacktestMetrics(
+            source="low.json", strategy="NFI", trades=2, profit_factor=3.0,
+            profit_total_pct=10.0, max_drawdown_pct=0.0, winrate=1.0,
+            avg_duration_seconds=3600, winning_days=2, draw_days=0,
+            losing_days=0, backtest_days=60,
+        )
+
+        result = score_backtest(metrics)
+
+        self.assertEqual(result.recommendation, "COLLECT_MORE_DATA")
 
 
 if __name__ == "__main__":

@@ -40,6 +40,86 @@ def _int(value: Any, default: int = 0) -> int:
     return int(value)
 
 
+@dataclass(frozen=True)
+class BacktestScore:
+    metrics: BacktestMetrics
+    score: int
+    confidence: str
+    recommendation: str
+    reasons: tuple[str, ...]
+
+
+def _clamp(value: float, minimum: float = 0.0, maximum: float = 100.0) -> int:
+    return int(round(max(minimum, min(maximum, value))))
+
+
+def score_backtest(metrics: BacktestMetrics, incomplete: bool = False) -> BacktestScore:
+    score = 50.0
+    reasons: list[str] = []
+
+    if metrics.profit_factor >= 1.5:
+        score += 15
+    elif metrics.profit_factor >= 1.2:
+        score += 8
+    elif metrics.profit_factor > 0:
+        score -= 10
+
+    if metrics.max_drawdown_pct >= 20:
+        score -= 30
+        reasons.append("max drawdown is above 20%")
+    elif metrics.max_drawdown_pct >= 15:
+        score -= 20
+        reasons.append("max drawdown is above live checklist threshold")
+    elif metrics.max_drawdown_pct >= 10:
+        score -= 10
+
+    if metrics.trades < 30:
+        score -= 25
+        reasons.append("fewer than 30 closed trades")
+    elif metrics.trades >= 100:
+        score += 10
+
+    if metrics.winrate >= 0.6:
+        score += 8
+    elif metrics.winrate < 0.5 and metrics.trades > 0:
+        score -= 8
+
+    hours = metrics.avg_duration_seconds / 3600 if metrics.avg_duration_seconds else 0
+    if hours > 48:
+        score -= 10
+        reasons.append("average trade duration is above 48h")
+    elif 0 < hours <= 24:
+        score += 5
+
+    active_days = metrics.winning_days + metrics.draw_days + metrics.losing_days
+    if active_days >= 5 and metrics.winning_days / active_days >= 0.65:
+        score += 7
+    elif active_days >= 5 and metrics.losing_days / active_days >= 0.45:
+        score -= 10
+
+    confidence = confidence_label(metrics.trades, incomplete=incomplete)
+    final_score = _clamp(score)
+
+    if confidence == "LOW":
+        recommendation = "COLLECT_MORE_DATA"
+    elif final_score >= 75 and metrics.max_drawdown_pct < 15:
+        recommendation = "KEEP_CURRENT"
+    elif final_score >= 65 and metrics.trades < 60:
+        recommendation = "EXPAND_PAIRLIST"
+    elif metrics.max_drawdown_pct >= 15:
+        recommendation = "TIGHTEN_PAIRLIST"
+    else:
+        recommendation = "DO_NOT_CHANGE_YET"
+
+    return BacktestScore(
+        metrics=metrics,
+        score=final_score,
+        confidence=confidence,
+        recommendation=recommendation,
+        reasons=tuple(reasons),
+    )
+
+
 def parse_backtest_payload(payload: dict[str, Any], source: str) -> BacktestMetrics:
     strategy_name = payload["strategy_comparison"][0]["key"]
     data = payload["strategy"][strategy_name]
