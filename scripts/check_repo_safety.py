@@ -136,6 +136,16 @@ def check_report_json_files(tracked: list[str]) -> None:
                     fail(f"invalid report recommendation in {path}")
 
 
+def check_matrix_not_in_ci() -> None:
+    workflows_dir = ROOT / ".github" / "workflows"
+    if not workflows_dir.exists():
+        return
+    for yml in workflows_dir.glob("*.yml"):
+        content = yml.read_text(encoding="utf-8")
+        if "run_backtest_matrix" in content:
+            fail(f"run_backtest_matrix must not be referenced in CI: {yml.name}")
+
+
 def main() -> None:
     tracked = git_ls_files()
     check_no_forbidden_tracked_files(tracked)
@@ -144,6 +154,7 @@ def main() -> None:
     check_freqtrade_config()
     check_json_templates()
     check_report_json_files(tracked)
+    check_matrix_not_in_ci()
     print("PASS: repository safety checks passed")
 
 

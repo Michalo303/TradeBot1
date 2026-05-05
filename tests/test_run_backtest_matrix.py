@@ -221,5 +221,20 @@ class BuildDockerCmdTests(unittest.TestCase):
         self.assertIn("trades", cmd_str)
 
 
+class SafetyCheckMatrixTests(unittest.TestCase):
+    def test_check_repo_safety_passes_without_matrix_in_ci(self):
+        import subprocess
+        result = subprocess.run(
+            ["python", "scripts/check_repo_safety.py"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("PASS", result.stdout)
+
+    def test_check_matrix_not_in_ci_yml_function_exists(self):
+        from scripts.check_repo_safety import check_matrix_not_in_ci
+        check_matrix_not_in_ci()
+
+
 if __name__ == "__main__":
     unittest.main()

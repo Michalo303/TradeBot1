@@ -59,6 +59,26 @@ Generate a risk-score report from a Freqtrade backtest JSON:
 python scripts/score_backtests.py user_data/backtest_results/backtest-result-YYYY-MM-DD_HH-MM-SS.json --output-dir reports
 ```
 
+Run a backtest matrix across pairlist variants (preview mode — no Docker):
+
+```bash
+python scripts/run_backtest_matrix.py manifests/conservative.json --timerange 20260101-20260401 --print-commands
+```
+
+Run for real (requires Docker, local data, and explicit confirmation):
+
+```bash
+python scripts/run_backtest_matrix.py manifests/conservative.json --timerange 20260101-20260401 --confirm
+```
+
+Matrix manifests live in `manifests/` (not committed — create locally):
+
+```json
+{ "variant": "conservative", "pairs": ["BTC/USDT", "ETH/USDT", "SOL/USDT"] }
+```
+
+Results do not replicate live portfolio behavior. Use for directional pairlist comparison only.
+
 ## Live Trading
 
 Live trading is intentionally disabled by default:
