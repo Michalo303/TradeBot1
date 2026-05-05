@@ -8,6 +8,41 @@ from datetime import date, timedelta
 from pathlib import Path
 
 
+FREQTRADE_IMAGE = "freqtradeorg/freqtrade:2024.5"
+CONTAINER_DATA_DIR = "/freqtrade/user_data"
+HOST_RESULTS_DIR = Path("user_data/backtest_results")
+
+
+def build_docker_cmd(
+    manifest: dict,
+    timerange: str,
+    run_id: str,
+    configs: list[Path],
+) -> tuple[list[str], Path]:
+    variant = manifest["variant"]
+    pairs = manifest["pairs"]
+    filename = f"nfix7-{variant}-{timerange}-{run_id}.json"
+    output_path = HOST_RESULTS_DIR / filename
+    container_output = f"{CONTAINER_DATA_DIR}/backtest_results/{filename}"
+
+    cmd = [
+        "docker", "run", "--rm",
+        "-v", f"{Path.cwd()}:/freqtrade",
+        FREQTRADE_IMAGE,
+        "backtesting",
+    ]
+    for cfg in configs:
+        cmd += ["--config", f"{CONTAINER_DATA_DIR}/config/{cfg.name}"]
+    cmd += [
+        "--strategy", "NostalgiaForInfinityX7",
+        "--timerange", timerange,
+        "--pairs", *pairs,
+        "--export", "trades",
+        "--export-filename", container_output,
+    ]
+    return cmd, output_path
+
+
 def validate_manifest(data: dict) -> dict:
     if not data.get("variant"):
         raise ValueError("manifest must have a non-empty 'variant' field")
